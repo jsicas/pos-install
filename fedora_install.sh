@@ -6,7 +6,7 @@ echo '========== Iniciando Pós-Intalação =========='
 # configurações
 set -e           # exit on error
 cd $(mktemp -d)  # vai para um diretório temporário
-mkdir -p $HOME/{GitHub,.log,bin} $HOME/Desktop/mestrado
+mkdir -p $HOME/{GitHub,.log,bin}
 
 # atualizando apps e repositórios
 sudo dnf -y upgrade
@@ -27,9 +27,9 @@ dnf_install=(
     # gerais
     gnome-tweaks code
     htop btop fastfetch neovim rclone git # utilitário do terminal
-	glycin-thumbnailer  # fix image thumbnails on nautilus
-    fira-code-fonts     # fontes
-    libxcrypt-compat    # necessário para referências no LaTeX com biblatex
+	#glycin-thumbnailer	# fix image thumbnails on nautilus
+    fira-code-fonts		# fontes
+    libxcrypt-compat	# necessário para referências no LaTeX com biblatex
 	ShellCheck
 
     # R e pacotes 
@@ -42,13 +42,13 @@ dnf_install=(
 flat_install=(
 	com.discordapp.Discord
     com.valvesoftware.Steam
-    com.mattjakeman.ExtensionManager
+    com.mattjakeman.ExtensionManager	# extension manager
 )
 
 echo 'Instalando aplicativos (dnf)...'
 sudo dnf install -yq ${dnf_install[@]}
 # alterando editor padrão de nano para vim, para isso é necessária a tag --allowerasing já que ele vai conflitar com o nano
-sudo dnf install -yq --allowerasing vim-default-editor
+#sudo dnf install -yq --allowerasing vim-default-editor
 
 echo 'Instalando aplicativos (flatpak)...'
 flatpak install -y flathub ${flat_install[@]}
@@ -56,9 +56,9 @@ flatpak install -y flathub ${flat_install[@]}
 
 # instalações manuais ---------------
 # Rstudio (Fedora 41)
-echo 'Instalando Rstudio...'
-wget -O rstudio.rpm https://download1.rstudio.org/electron/rhel9/x86_64/rstudio-2025.09.1-401-x86_64.rpm
-sudo dnf install -y ./rstudio.rpm
+#echo 'Instalando Rstudio...'
+#wget -O rstudio.rpm https://download1.rstudio.org/electron/rhel9/x86_64/rstudio-2025.09.1-401-x86_64.rpm
+#sudo dnf install -y ./rstudio.rpm
 
 # Starship
 echo 'Instalando Starship...'
@@ -96,27 +96,27 @@ dotfile checkout -f   # aplica os dotfiles (-f sobrescreve arquivos)
 
 
 # TeX Live ================================================
-echo 'Removendo TeX Live padrão...'
-sudo dnf remove -y texlive*
-echo 'Instalando TeX Live...'
-wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-zcat < install-tl-unx.tar.gz | tar xf -
-cd install-tl-2*
-perl ./install-tl -profile ../texlive.profile
+#echo 'Removendo TeX Live padrão...'
+#sudo dnf remove -y texlive*
+#echo 'Instalando TeX Live...'
+#wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+#zcat < install-tl-unx.tar.gz | tar xf -
+#cd install-tl-2*
+#perl ./install-tl -profile ../texlive.profile
 # Após a instalação é necessário colocar o TeX Live no PATH, no geral isso envolve colocar as seguintes linhas em .bash_profile:
-#export PATH="$HOME/.texlive/2025/bin/x86_64-linux:$PATH"
-#export MANPATH="$HOME/.texlive/2025/texmf-dist/doc/man:$MANPATH"
-#export INFOPATH="$HOME/.texlive/2025/texmf-dist/doc/info:$INFOPATH"
+# export PATH="$HOME/.texlive/2025/bin/x86_64-linux:$PATH"
+# export MANPATH="$HOME/.texlive/2025/texmf-dist/doc/man:$MANPATH"
+# export INFOPATH="$HOME/.texlive/2025/texmf-dist/doc/info:$INFOPATH"
 # No meu caso, como já estão nos meus dotfiles, essa etapa será pulada.
 
-source $HOME/.bash_profile  # aplicando configurações do PATH para tlmgr funcionar
+#source $HOME/.bash_profile  # aplicando configurações do PATH para tlmgr funcionar
 
 # instalando pacotes do LaTeX
-tlmgr_install=(
-    mathtools multirow float csquotes xypic algorithm2e ifoddpage relsize
-    caption appendix forest
-)
-tlmgr install ${tlmgr_install[@]}
+#tlmgr_install=(
+#    mathtools multirow float csquotes xypic algorithm2e ifoddpage relsize
+#    caption appendix forest
+#)
+#tlmgr install ${tlmgr_install[@]}
 
 echo 'Fim da pós instalação.'
 
