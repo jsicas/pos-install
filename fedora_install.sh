@@ -26,14 +26,14 @@ dnf_install=(
 	
     # gerais
     gnome-tweaks code
-    htop btop fastfetch neovim rclone git # utilitário do terminal
+    htop btop fastfetch neovim micro rclone git # utilitário do terminal
 	#glycin-thumbnailer	# fix image thumbnails on nautilus
     fira-code-fonts		# fontes
-    libxcrypt-compat	# necessário para referências no LaTeX com biblatex
+    #libxcrypt-compat	# necessário para referências no LaTeX com biblatex
 	ShellCheck
 
     # R e pacotes 
-    R
+    #R
     #libcurl-devel openssl-devel libxml2-devel fontconfig-devel harfbuzz-devel fribidi-devel
     #freetype-devel libpng-devel libtiff-devel libjpeg-devel libwebp-devel v8-devel
     #gdal-devel proj-devel geos-devel sqlite-devel udunits2 udunits2-devel abseil-cpp-devel
@@ -43,6 +43,7 @@ flat_install=(
 	com.discordapp.Discord
     com.valvesoftware.Steam
     com.mattjakeman.ExtensionManager	# extension manager
+    md.obsidian.Obsidian
 )
 
 echo 'Instalando aplicativos (dnf)...'
@@ -96,8 +97,8 @@ dotfile checkout -f   # aplica os dotfiles (-f sobrescreve arquivos)
 
 
 # TeX Live ================================================
-#echo 'Removendo TeX Live padrão...'
-#sudo dnf remove -y texlive*
+echo 'Removendo TeX Live padrão...'
+sudo dnf remove -y texlive*
 #echo 'Instalando TeX Live...'
 #wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 #zcat < install-tl-unx.tar.gz | tar xf -
