@@ -1,12 +1,28 @@
 #!/usr/bin/env bash 
+# Script para atuomatizar o pós instalação no Fedora Workstation (Gnome)
+# Adicionar:
+# 	- Problema com sudo (demora a instação ai ele perde o sudo)
+#  	- implementar logs de erro no script
+# 	- Melhorar visual usando script com carregamento parecido com braile
+# 	- Modularizar podendo escolher o que se deseja instalar
+# 	- Placa de vídeo
+#	- Automatizar configurações do terminal
+# 		- [] tema
+# 		- [] tamanho da letra
+# 	- Ajuste do ambiente Gnome
+# 		- [] Considerar formatos United Kingdon
 
-# script para automatizar a pós instalação do Fedora Workstation 42 com Gnome.
 echo '========== Iniciando Pós-Intalação =========='
 
-# configurações
-set -e           # exit on error
-cd $(mktemp -d)  # vai para um diretório temporário
+# configs
+set -eE	# e: exit se erro, E: trap entra nas funções
+trap 'echo [ERROR] Line $LINENO: $BASH_COMMAND' ERR
 mkdir -p $HOME/{GitHub,.log,bin}
+
+# changing DNF's default answer to Y ([y/N] to [Y/n])
+if ! grep -q '^defaultyes' /etc/dnf/dnf.conf; then				# executa se não tem linha começando em defaultyes
+	sed -i.old '/\[main\]/a defaultyes=True' /etc/dnf/dnf.conf 	# append a linha após [main] e salva cópia como .old
+fi
 
 # atualizando apps e repositórios
 sudo dnf -y upgrade
@@ -17,16 +33,16 @@ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
 
 
-# instalações =============================================
-# pacotes para instalação -----------
+# Packages ================================================
+# pacotes para instalação -------------
 dnf_install=(
     # RPM Fusion Freen e Nonfree
-    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm        # Free
+	https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm        # Free
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm  # Nonfree
 	
     # gerais
     gnome-tweaks code
-    htop btop fastfetch neovim micro rclone git # utilitário do terminal
+    htop btop fastfetch vim neovim micro rclone git # utilitário do terminal
 	#glycin-thumbnailer	# fix image thumbnails on nautilus
     fira-code-fonts		# fontes
     #libxcrypt-compat	# necessário para referências no LaTeX com biblatex
@@ -55,7 +71,7 @@ echo 'Instalando aplicativos (flatpak)...'
 flatpak install -y flathub ${flat_install[@]}
 
 
-# instalações manuais ---------------
+# instalações manuais -----------------
 # Rstudio (Fedora 41)
 #echo 'Instalando Rstudio...'
 #wget -O rstudio.rpm https://download1.rstudio.org/electron/rhel9/x86_64/rstudio-2025.09.1-401-x86_64.rpm
@@ -63,43 +79,63 @@ flatpak install -y flathub ${flat_install[@]}
 
 # Starship
 echo 'Instalando Starship...'
-sudo dnf copr enable atim/starship
-sudo dnf install starship
+sudo dnf -yq copr enable atim/starship
+sudo dnf -yq install starship
 # Após a instalação é necessário colocar em .bashrc:
 #eval "$(starship init bash)"
 # Como já fiz nos meus dotfiles, pulei essa etapa.
 
 
-# configurações do DE =====================================
-echo 'Aplicando configurações no Desktop Enviroment...'
+# Configurando GNOME  =====================================
+# configs gerais
+echo 'Aplicando configurações no GNOME...'
+
 gsettings set org.gnome.desktop.interface clock-format '24h'
-gsettings set org.gnome.desktop.session idle-delay 600  # tempo para desligamento de tela por inatividade
+gsettings set org.gnome.desktop.interface cursor-blink false			# disable cursos blink
+gsettings set org.gnome.desktop.interface enable-hot-corners false		# disable hot cornor
+gsettings set org.gnome.desktop.peripherals.mouse accel-profile 'flat'	# disable mouse acceleration
+gsettings set org.gnome.desktop.session idle-delay 600  				# tempo para desligamento de tela por inatividade
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'       # desativa suspender no carregador
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'  # desativa suspender na bateria
+gsettings set org.gnome.Ptyxis cursor-shape 'ibeam'						# cursos I-beam no terminal
+gsettings set org.gnome.desktop.interface gtk-enable-primary-paste true	# permite colar com o scroll no terminal (vem desativado desde o GNOME 50)
 
-# desativando funções de suspender
-gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'       # usando o carregador
-gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'  # na bateria
+# resolve problema do alt + shitf + tab e troca de idioma no teclado
+gsettings set org.gnome.desktop.input-sources xkb-options "[]"
 
-# atalho <super> + t para abrir terminal
-# deve-se verificar antes quais atalhos já estão definidos, como não havia nenhum, foi utilizado custom0.
-#gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings  # ver atalhos já definidos
-slot='/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot name 'Abrir Terminal (Ptyxis)'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot command 'ptyxis'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot binding '<Super>t'
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$slot']"
+
+# Atalhos -----------------------------
+# Verificar quais atalhos já foram definidos:
+#	gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
+
+# Abrir Terminal: <super> + t
+slot0='/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot0 name 'Launch Terminal (Ptyxis)'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot0 command 'ptyxis'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot0 binding '<Super>t'
+
+# Abrir Nautilus: <super> + f
+slot1='/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot1 name 'Launch File Manager (Nautilus)'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot1 command 'nautilus'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot1 binding '<Super>f'
+
+# registra atalho
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$slot0', '$slot1']"
 
 
 # dotfiles ================================================
 echo 'Baixando e aplicando dotfiles...'
 git clone --bare https://github.com/jsicas/dotfiles.git $HOME/.dotfiles
-source $HOME/.bashrc  # carregando alias
-dotfile checkout -f   # aplica os dotfiles (-f sobrescreve arquivos)
+git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfiles (-f sobrescreve arquivos)
+. $HOME/.bashrc  # load alias
 
 
 # TeX Live ================================================
 echo 'Removendo TeX Live padrão...'
-sudo dnf remove -y texlive*
+sudo dnf remove -y 'texlive*' nano
 #echo 'Instalando TeX Live...'
+#cd $(mktemp -d)  # vai para um diretório temporário
 #wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 #zcat < install-tl-unx.tar.gz | tar xf -
 #cd install-tl-2*
