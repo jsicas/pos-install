@@ -1,13 +1,6 @@
 #!/usr/bin/env bash 
 # Script para atuomatizar o pós instalação no Fedora Workstation (Gnome)
-# date: 07/11/2026
-# Adicionar:
-#  	- implementar logs de erro no script
-# 	- Melhorar visual usando script com carregamento parecido com braile
-# 	- Modularizar podendo escolher o que se deseja instalar
-# 	- Ajuste do ambiente Gnome
-# 		- [] Considerar formatos United Kingdon
-
+# date: 08/11/2026
 
 echo '========== Iniciando Pós-Intalação =========='
 
@@ -47,7 +40,11 @@ echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com
 sudo dnf -yq copr enable atim/starship
 # Após a instalação é necessário colocar em .bashrc:
 #eval "$(starship init bash)"
-# Como já fiz nos meus dotfiles, pulei essa etapa.
+
+
+# removing packages -------------
+echo -e '\n\nRemoving packages...\n'
+sudo dnf remove -y 'texlive*' nano gnome-clocks
 
 
 # pacotes para instalação -------------
@@ -60,7 +57,7 @@ dnf_install=(
     gnome-tweaks code
     htop btop fastfetch vim neovim micro rclone git gh starship # utilitário do terminal
 	#glycin-thumbnailer	# fix image thumbnails on nautilus
-    fira-code-fonts		# fontes
+    fira-code-fonts	cascadia-code-nf-fonts	# fontes
     #libxcrypt-compat	# necessário para referências no LaTeX com biblatex
 	ShellCheck
 
@@ -82,12 +79,12 @@ flat_install=(
     com.mattjakeman.ExtensionManager
 )
 
-echo 'Instalando aplicativos (dnf)...'
+echo -e '\n\nInstalando aplicativos (dnf)...\n'
 sudo dnf install -yq ${dnf_install[@]}
 # alterando editor padrão de nano para vim, para isso é necessária a tag --allowerasing já que ele vai conflitar com o nano
 #sudo dnf install -yq --allowerasing vim-default-editor
 
-echo 'Instalando aplicativos (flatpak)...'
+echo -e '\n\nInstalando aplicativos (flatpak)...\n'
 flatpak install -y flathub ${flat_install[@]}
 
 
@@ -100,17 +97,20 @@ flatpak install -y flathub ${flat_install[@]}
 
 # GNOME Configuration =====================================
 # configs de ambiente -----------------
-echo 'Aplicando configurações no GNOME...'
+echo -e '\n\nAplicando configurações no GNOME...\n'
 
 gsettings set org.gnome.desktop.interface clock-format '24h'
 gsettings set org.gnome.desktop.interface cursor-blink false			# disable cursos blink
 gsettings set org.gnome.desktop.interface enable-hot-corners false		# disable hot cornor
 gsettings set org.gnome.desktop.peripherals.mouse accel-profile 'flat'	# disable mouse acceleration
 gsettings set org.gnome.desktop.session idle-delay 600  				# tempo para desligamento de tela por inatividade
+gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,close'	# botão de minimizar e fechar
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'       # desativa suspender no carregador
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'  # desativa suspender na bateria
 gsettings set org.gnome.Ptyxis cursor-shape 'ibeam'						# cursos I-beam no terminal
 gsettings set org.gnome.desktop.interface gtk-enable-primary-paste true	# permite colar com o scroll no terminal (vem desativado desde o GNOME 50)
+gsettings set org.gnome.Ptyxis use-system-font false			# desliga usar padrão do sistema para o próximo comando funcionar
+gsettings set org.gnome.Ptyxis font-name 'Cascadia Code NF 13'	# fonte padrão do terminal
 
 # resolve problema do alt + shitf + tab e troca de idioma no teclado
 gsettings set org.gnome.desktop.input-sources xkb-options "[]"
@@ -137,7 +137,7 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[
 
 
 # dotfiles e gh ===========================================
-echo 'Baixando e aplicando dotfiles...'
+echo -e '\n\nBaixando e aplicando dotfiles...\n'
 git clone --bare https://github.com/jsicas/dotfiles.git $HOME/.dotfiles
 git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfiles (-f sobrescreve arquivos)
 . $HOME/.bashrc  # load alias
@@ -147,12 +147,11 @@ git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfile
 
 
 # TeX Live ================================================
-echo 'Removendo TeX Live padrão...'
-sudo dnf remove -y 'texlive*' nano gnome-clocks
+#echo -e '\n\nTeX Live install...\n'
 #echo 'Instalando TeX Live...'
 #cd $(mktemp -d)  	# vai para um diretório temporário
 #texlive_profile=$(mktemp)	# arq temporário para armazenar o perfil
-#curl -fsSL 'https://raw.githubusercontent.com/jsicas/pos-install/main/texlive.profile' -o "$texlive_profile"  # salva conteúdo dentro do arq temporário $profile
+#curl -fsSL 'https://raw.githubusercontent.com/jsicas/pos-install/main/others/texlive.profile' -o "$texlive_profile"  # salva conteúdo dentro do arq temporário $profile
 #wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz  # download zip do texlive
 #zcat < install-tl-unx.tar.gz | tar xf -
 #cd install-tl-2*
@@ -175,12 +174,12 @@ echo 'Fim da pós instalação.'
 
 # Para finalizar a instalação:
 #### Extensões
-# - Dash to panel: configurações da barra de tarefas;
-# - Dash to dock: dock fica aparecendo
+# - Dash to dock: dock fica aparecendo;
+# - AppIndicator and KStatusNotifierItem Support: habilita suporte à indicadores na barra de tarefas;
+# - Steal my focus window: ao invés de aparecer uma notificação, simplesmente já abre a janela, sem precisar ter que selecionar o popup. 
 # - Color Picker: lupa para captura de cor;
 # - Search light, rofi ou Vicinae: laucher de apps;
-# - AppIndicator and KStatusNotifierItem Support: habilita suporte à indicadores na barra de tarefas;
+# - Dash to panel: configurações da barra de tarefas;
 # - Disable unredirect fullscreen windows: resolve problema de tearing em janelas que utilizam aceleração de hardware;
-# - Steal my focus window: ao invés de aparecer uma notificação, simplesmente já abre a janela, sem precisar ter que selecionar o popup. 
 #### Cron
 #0 */2 * * * rclone bisync $HOME/Desktop/mestrado drive:Estudos/mestrado --fast-list --force --recover -v > $HOME/.log/rclone_mestrado.log 2>&1 || notify-send -i dialog-    warning "Erro" "Sincronização dos arquivos com o drive não ocorreu."

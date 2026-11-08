@@ -1,0 +1,41 @@
+  22622 kworker/0:1-eve [kworker/0:1-events]                                                                                                                                                  
+  22646 kworker/6:2-eve [kworker/6:2-events]                                                                                                                                                  
+  23431 kworker/u32:9-b [kworker/u32:9-btrfs-endio-meta]                                                                                                                                      
+  23511 kworker/1:1     [kworker/1:1]                                                                                                                                                         
+  23530 kworker/4:1-eve [kworker/4:1-events]                                                                                                                                                  
+  23713 kworker/7:0-eve [kworker/7:0-events]                                                                                                                                                  
+  23724 Web Content     /usr/lib64/firefox/firefox -contentproc -isForBrowser -prefsHandle 0:53995 -prefMapHandle 1:303373 -jsInitHandle 2:161360 -parentBuildID 20261104112603 -sandboxReport
+  24109 Web Content     /usr/lib64/firefox/firefox -contentproc -isForBrowser -prefsHandle 0:53995 -prefMapHandle 1:303373 -jsInitHandle 2:161360 -parentBuildID 20261104112603 -sandboxReport
+  24519 kworker/u32:2-b [kworker/u32:2-btrfs-endio-meta]                                                                                                                                      
+  24863 systemd-userwor systemd-userwork: waiting...                                                                                                                                          
+  24901 wl-copy         wl-copy                                                                                                                                                               
+  25360 systemd-userwor systemd-userwork: waiting...                                                                                                                                          
+  25425 micro           micro fedora_install.sh                                                                                                                                               
+  25549 Web Content     /usr/lib64/firefox/firefox -contentproc -isForBrowser -prefsHandle 0:53996 -prefMapHandle 1:303373 -jsInitHandle 2:161360 -parentBuildID 20261104112603 -sandboxReport
+  25731 systemd-userwor systemd-userwork: waiting...                                                                                                                                          
+  25748 watch           watch -n 0.1 ps -eo pid,comm,args --sort=start_time | tail -20                                                                                                        
+  26190 watch           watch -n 0.1 ps -eo pid,comm,args --sort=start_time | tail -20                                                                                                        
+  26191 sh              sh -c -- ps -eo pid,comm,args --sort=start_time | tail -20                                                                                                            
+  26192 ps              ps -eo pid,comm,args --sort=start_time                                                                                                                                
+  26193 tail            tail -20                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
+                                                                                                                                                                                              
