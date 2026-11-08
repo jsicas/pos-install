@@ -141,8 +141,9 @@ echo -e '\n\nBaixando e aplicando dotfiles...\n'
 git clone --bare https://github.com/jsicas/dotfiles.git $HOME/.dotfiles
 git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfiles (-f sobrescreve arquivos)
 . $HOME/.bashrc  # load alias
+dotfile config --local status.showUntrackedFiles no  # oculta arquivos untracked
 
-
+# faça login no GitHub utilizando o comando:
 #gh auth login -w -c -p https  # gh login -w para web, -c para copiar o código para o clipboard, -p para definir o protocolo
 
 
