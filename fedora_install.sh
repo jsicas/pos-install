@@ -150,16 +150,17 @@ git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfile
 echo 'Removendo TeX Live padrão...'
 sudo dnf remove -y 'texlive*' nano gnome-clocks
 #echo 'Instalando TeX Live...'
-#cd $(mktemp -d)  # vai para um diretório temporário
-#wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+#cd $(mktemp -d)  	# vai para um diretório temporário
+#texlive_profile=$(mktemp)	# arq temporário para armazenar o perfil
+#curl -fsSL 'https://raw.githubusercontent.com/jsicas/pos-install/main/texlive.profile' -o "$texlive_profile"  # salva conteúdo dentro do arq temporário $profile
+#wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz  # download zip do texlive
 #zcat < install-tl-unx.tar.gz | tar xf -
 #cd install-tl-2*
-#perl ./install-tl -profile ../texlive.profile
+#perl ./install-tl -profile "$texlive_profile"
 # Após a instalação é necessário colocar o TeX Live no PATH, no geral isso envolve colocar as seguintes linhas em .bash_profile:
 # export PATH="$HOME/.texlive/2025/bin/x86_64-linux:$PATH"
 # export MANPATH="$HOME/.texlive/2025/texmf-dist/doc/man:$MANPATH"
 # export INFOPATH="$HOME/.texlive/2025/texmf-dist/doc/info:$INFOPATH"
-# No meu caso, como já estão nos meus dotfiles, essa etapa será pulada.
 
 #source $HOME/.bash_profile  # aplicando configurações do PATH para tlmgr funcionar
 
