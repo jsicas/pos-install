@@ -1,29 +1,40 @@
 #!/usr/bin/env bash 
 # Script para atuomatizar o pós instalação no Fedora Workstation (Gnome)
+# date: 07/11/2026
 # Adicionar:
-# 	- Problema com sudo (demora a instação ai ele perde o sudo)
 #  	- implementar logs de erro no script
 # 	- Melhorar visual usando script com carregamento parecido com braile
 # 	- Modularizar podendo escolher o que se deseja instalar
-# 	- Placa de vídeo
-#	- Automatizar configurações do terminal
-# 		- [] tema
-# 		- [] tamanho da letra
 # 	- Ajuste do ambiente Gnome
 # 		- [] Considerar formatos United Kingdon
 
+
 echo '========== Iniciando Pós-Intalação =========='
 
-# configs
-set -eE	# e: exit se erro, E: trap entra nas funções
-trap 'echo [ERROR] Line $LINENO: $BASH_COMMAND' ERR
-mkdir -p $HOME/{GitHub,.log,bin}
+# configs -----------------------------
+set -eE	# e: exit on error, E: trap entra nas funções
+mkdir -p $HOME/{GitHub,.log,bin}	# criando diretórios
+
+# trap: executa o CMD quando recebe o sinal passado.
+# 	Se usar ' o CMD passado só executa ao recebimento do sinal.
+# 	Se usar " o CMD é executado assim a linha do TRAP é lida
+trap 'echo "[ERROR] Line $LINENO: $BASH_COMMAND"' ERR 	# msg de erro
+trap 'kill 0' EXIT	# mata todos os processos do grupo do processo atual, ou seja, mata os processos em bg criados
+
+# mantendo sudo até finalziar o script
+# esse processo é finalizando quando o trap kill 0 é executado
+while :; do
+	sudo -v  # renova o sudo por mais tempo 
+	sleep 60
+done & # joga no background
 
 # changing DNF's default answer to Y ([y/N] to [Y/n])
-if ! grep -q '^defaultyes' /etc/dnf/dnf.conf; then				# executa se não tem linha começando em defaultyes
-	sed -i.old '/\[main\]/a defaultyes=True' /etc/dnf/dnf.conf 	# append a linha após [main] e salva cópia como .old
+if ! grep -q '^defaultyes' /etc/dnf/dnf.conf; then					 # executa se não tem linha começando em defaultyes
+	sudo sed -i.old '/\[main\]/a defaultyes=True' /etc/dnf/dnf.conf  # append a linha após [main] e salva cópia como .old
 fi
 
+
+# Packages ================================================
 # atualizando apps e repositórios
 sudo dnf -y upgrade
 sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo  # habilita flatpak (se preciso)
@@ -32,8 +43,13 @@ sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flat
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
 
+# para o Starship
+sudo dnf -yq copr enable atim/starship
+# Após a instalação é necessário colocar em .bashrc:
+#eval "$(starship init bash)"
+# Como já fiz nos meus dotfiles, pulei essa etapa.
 
-# Packages ================================================
+
 # pacotes para instalação -------------
 dnf_install=(
     # RPM Fusion Freen e Nonfree
@@ -42,11 +58,15 @@ dnf_install=(
 	
     # gerais
     gnome-tweaks code
-    htop btop fastfetch vim neovim micro rclone git # utilitário do terminal
+    htop btop fastfetch vim neovim micro rclone git gh starship # utilitário do terminal
 	#glycin-thumbnailer	# fix image thumbnails on nautilus
     fira-code-fonts		# fontes
     #libxcrypt-compat	# necessário para referências no LaTeX com biblatex
 	ShellCheck
+
+	# nvidia drivers
+	akmod-nvidia  # compila o driver quando precisa
+	xorg-x11-drv-nvidia-cuda  # (opcional) fornece a interface do CUDA e comando nvidia-smi
 
     # R e pacotes 
     #R
@@ -58,8 +78,8 @@ dnf_install=(
 flat_install=(
 	com.discordapp.Discord
     com.valvesoftware.Steam
-    com.mattjakeman.ExtensionManager	# extension manager
     md.obsidian.Obsidian
+    com.mattjakeman.ExtensionManager
 )
 
 echo 'Instalando aplicativos (dnf)...'
@@ -77,17 +97,9 @@ flatpak install -y flathub ${flat_install[@]}
 #wget -O rstudio.rpm https://download1.rstudio.org/electron/rhel9/x86_64/rstudio-2025.09.1-401-x86_64.rpm
 #sudo dnf install -y ./rstudio.rpm
 
-# Starship
-echo 'Instalando Starship...'
-sudo dnf -yq copr enable atim/starship
-sudo dnf -yq install starship
-# Após a instalação é necessário colocar em .bashrc:
-#eval "$(starship init bash)"
-# Como já fiz nos meus dotfiles, pulei essa etapa.
 
-
-# Configurando GNOME  =====================================
-# configs gerais
+# GNOME Configuration =====================================
+# configs de ambiente -----------------
 echo 'Aplicando configurações no GNOME...'
 
 gsettings set org.gnome.desktop.interface clock-format '24h'
@@ -104,7 +116,7 @@ gsettings set org.gnome.desktop.interface gtk-enable-primary-paste true	# permit
 gsettings set org.gnome.desktop.input-sources xkb-options "[]"
 
 
-# Atalhos -----------------------------
+# Shortcuts -----------------------------
 # Verificar quais atalhos já foram definidos:
 #	gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings
 
@@ -120,20 +132,23 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$sl
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot1 command 'nautilus'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$slot1 binding '<Super>f'
 
-# registra atalho
+# registra atalhos anteriores
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$slot0', '$slot1']"
 
 
-# dotfiles ================================================
+# dotfiles e gh ===========================================
 echo 'Baixando e aplicando dotfiles...'
 git clone --bare https://github.com/jsicas/dotfiles.git $HOME/.dotfiles
 git --git-dir=$HOME/.dotfiles --work-tree=$HOME checkout -f  # aplica os dotfiles (-f sobrescreve arquivos)
 . $HOME/.bashrc  # load alias
 
 
+#gh auth login -w -c -p https  # gh login -w para web, -c para copiar o código para o clipboard, -p para definir o protocolo
+
+
 # TeX Live ================================================
 echo 'Removendo TeX Live padrão...'
-sudo dnf remove -y 'texlive*' nano
+sudo dnf remove -y 'texlive*' nano gnome-clocks
 #echo 'Instalando TeX Live...'
 #cd $(mktemp -d)  # vai para um diretório temporário
 #wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
@@ -160,8 +175,9 @@ echo 'Fim da pós instalação.'
 # Para finalizar a instalação:
 #### Extensões
 # - Dash to panel: configurações da barra de tarefas;
+# - Dash to dock: dock fica aparecendo
 # - Color Picker: lupa para captura de cor;
-# - Search light ou Vicinae: laucher de apps;
+# - Search light, rofi ou Vicinae: laucher de apps;
 # - AppIndicator and KStatusNotifierItem Support: habilita suporte à indicadores na barra de tarefas;
 # - Disable unredirect fullscreen windows: resolve problema de tearing em janelas que utilizam aceleração de hardware;
 # - Steal my focus window: ao invés de aparecer uma notificação, simplesmente já abre a janela, sem precisar ter que selecionar o popup. 
