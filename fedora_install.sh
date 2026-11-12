@@ -42,7 +42,7 @@ sudo dnf -yq copr enable atim/starship
 #eval "$(starship init bash)"
 
 
-# removing packages -------------
+# removing packages -------------------
 echo -e '\n\nRemoving packages...\n'
 sudo dnf remove -y 'texlive*' nano gnome-clocks
 
@@ -100,6 +100,7 @@ flatpak install -y flathub ${flat_install[@]}
 echo -e '\n\nAplicando configurações no GNOME...\n'
 
 gsettings set org.gnome.desktop.interface clock-format '24h'
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'	# set dark theme
 gsettings set org.gnome.desktop.interface cursor-blink false			# disable cursos blink
 gsettings set org.gnome.desktop.interface enable-hot-corners false		# disable hot cornor
 gsettings set org.gnome.desktop.peripherals.mouse accel-profile 'flat'	# disable mouse acceleration
@@ -111,6 +112,7 @@ gsettings set org.gnome.Ptyxis cursor-shape 'ibeam'						# cursos I-beam no term
 gsettings set org.gnome.desktop.interface gtk-enable-primary-paste true	# permite colar com o scroll no terminal (vem desativado desde o GNOME 50)
 gsettings set org.gnome.Ptyxis use-system-font false			# desliga usar padrão do sistema para o próximo comando funcionar
 gsettings set org.gnome.Ptyxis font-name 'Cascadia Code NF 13'	# fonte padrão do terminal
+
 
 # resolve problema do alt + shitf + tab e troca de idioma no teclado
 gsettings set org.gnome.desktop.input-sources xkb-options "[]"
@@ -134,6 +136,13 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$sl
 
 # registra atalhos anteriores
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$slot0', '$slot1']"
+
+
+# Gnome extensions --------------------
+# carregando as configurações
+dconf load /org/gnome/shell/extensions/ < <(curl -fsS 'https://raw.githubusercontent.com/jsicas/pos-install/main/others/gnome_extensions.conf')
+# para obter as configs das extensões instaladas:
+#dconf dump /org/gnome/shell/extensions/
 
 
 # dotfiles e gh ===========================================
@@ -170,6 +179,8 @@ dotfile config --local status.showUntrackedFiles no  # oculta arquivos untracked
 #    caption appendix forest
 #)
 #tlmgr install ${tlmgr_install[@]}
+
+
 
 echo 'Fim da pós instalação.'
 
