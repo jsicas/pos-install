@@ -140,7 +140,7 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[
 
 # Gnome extensions --------------------
 # carregando as configurações
-dconf load /org/gnome/shell/extensions/ < <(curl -fsS 'https://raw.githubusercontent.com/jsicas/pos-install/main/others/gnome_extensions.conf')
+dconf load /org/gnome/shell/extensions/ < <(curl -fsS 'https://raw.githubusercontent.com/jsicas/pos-install/main/configs/gnome_extensions.conf')
 # para obter as configs das extensões instaladas:
 #dconf dump /org/gnome/shell/extensions/
 
@@ -161,7 +161,7 @@ dotfile config --local status.showUntrackedFiles no  # oculta arquivos untracked
 #echo 'Instalando TeX Live...'
 #cd $(mktemp -d)  	# vai para um diretório temporário
 #texlive_profile=$(mktemp)	# arq temporário para armazenar o perfil
-#curl -fsSL 'https://raw.githubusercontent.com/jsicas/pos-install/main/others/texlive.profile' -o "$texlive_profile"  # salva conteúdo dentro do arq temporário $profile
+#curl -fsSL 'https://raw.githubusercontent.com/jsicas/pos-install/main/configs/texlive.profile' -o "$texlive_profile"  # salva conteúdo dentro do arq temporário $profile
 #wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz  # download zip do texlive
 #zcat < install-tl-unx.tar.gz | tar xf -
 #cd install-tl-2*
