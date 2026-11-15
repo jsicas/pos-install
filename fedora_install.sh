@@ -50,20 +50,23 @@ sudo dnf remove -y 'texlive*' nano gnome-clocks
 # pacotes para instalação -------------
 dnf_install=(
     # RPM Fusion Freen e Nonfree
-	https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm        # Free
+    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm        # Free
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm  # Nonfree
 	
     # gerais
     gnome-tweaks code
-    htop btop fastfetch vim neovim micro rclone git gh starship # utilitário do terminal
-	#glycin-thumbnailer	# fix image thumbnails on nautilus
+    htop btop fastfetch vim micro rclone git gh starship # utilitário do terminal
+    #glycin-thumbnailer	# fix image thumbnails on nautilus
     fira-code-fonts	cascadia-code-nf-fonts	# fontes
     #libxcrypt-compat	# necessário para referências no LaTeX com biblatex
-	ShellCheck
+    ShellCheck
 
-	# nvidia drivers
-	akmod-nvidia  # compila o driver quando precisa
-	xorg-x11-drv-nvidia-cuda  # (opcional) fornece a interface do CUDA e comando nvidia-smi
+    # nvidia drivers
+    akmod-nvidia  # compila o driver quando precisa
+    xorg-x11-drv-nvidia-cuda  # (opcional) fornece a interface do CUDA e comando nvidia-smi
+    
+    # nvim e dependências
+    neovim gcc make git ripgrep fd-find tree-sitter-cli unzip neovim
 
     # R e pacotes 
     #R
@@ -73,7 +76,7 @@ dnf_install=(
 )
 
 flat_install=(
-	com.discordapp.Discord
+    com.discordapp.Discord
     com.valvesoftware.Steam
     md.obsidian.Obsidian
     com.mattjakeman.ExtensionManager
